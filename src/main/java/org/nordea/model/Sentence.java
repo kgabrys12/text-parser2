@@ -38,7 +38,7 @@ public class Sentence implements Comparable<Sentence> {
 
     @Override
     public int compareTo(Sentence other) {
-        return this.getSortedWords().toString().compareTo(other.getSortedWords().toString());
+        return this.words.toString().compareTo(other.words.toString());
     }
 
     @Override
