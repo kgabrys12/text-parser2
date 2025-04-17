@@ -33,7 +33,7 @@ public class Main {
             TextParser parser = new TextParser();
             parser.parse(inputFile, compositeHandler);
 
-            log.info("Output files have been saved successfully.");
+            log.info("Output files have been saved successfully: {}.xml, {}.csv", baseName, baseName);
         } catch (IOException e) {
             log.error("Error processing files", e);
         }
