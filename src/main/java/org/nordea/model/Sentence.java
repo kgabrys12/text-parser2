@@ -11,11 +11,19 @@ public class Sentence implements Comparable<Sentence> {
         this.words = new ArrayList<>();
     }
 
+    public Sentence(List<String> words) {
+        this.words = new ArrayList<>(words); // defensive copy
+    }
+
     public void addWord(String word) {
         words.add(word);
     }
 
     public List<String> getWords() {
+        return new ArrayList<>(words);
+    }
+
+    public List<String> getSortedWords() {
         List<String> sortedWords = new ArrayList<>(words);
         sortedWords.sort((word1, word2) -> {
             int caseInsensitiveComparison = String.CASE_INSENSITIVE_ORDER.compare(word1, word2);
@@ -30,7 +38,7 @@ public class Sentence implements Comparable<Sentence> {
 
     @Override
     public int compareTo(Sentence other) {
-        return this.getWords().toString().compareTo(other.getWords().toString());
+        return this.getSortedWords().toString().compareTo(other.getSortedWords().toString());
     }
 
     @Override
@@ -38,11 +46,11 @@ public class Sentence implements Comparable<Sentence> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Sentence sentence = (Sentence) o;
-        return Objects.equals(getWords(), sentence.getWords());
+        return Objects.equals(words, sentence.words);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getWords());
+        return Objects.hash(words);
     }
 }

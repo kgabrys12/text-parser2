@@ -1,20 +1,24 @@
 package org.nordea;
 
-import org.nordea.generator.CSVGenerator;
-import org.nordea.generator.XMLGenerator;
-import org.nordea.model.Sentence;
+import org.nordea.handler.CSVSentenceHandler;
+import org.nordea.handler.CompositeHandler;
+import org.nordea.handler.SentenceHandler;
+import org.nordea.handler.XMLSentenceHandler;
 import org.nordea.parser.TextParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("Usage: java org.nordea.Main <input-file>");
+            log.error("Usage: java org.nordea.Main <input-file>");
             System.exit(1);
         }
 
@@ -22,27 +26,28 @@ public class Main {
         File input = new File(inputFile);
         String baseName = input.getName().substring(0, input.getName().lastIndexOf('.'));
 
-        try (FileReader reader = new FileReader(inputFile)) {
+        try {
+            List<SentenceHandler> handlers = createHandlers(baseName);
+            SentenceHandler compositeHandler = new CompositeHandler(handlers);
+
             TextParser parser = new TextParser();
-            List<Sentence> sentences = parser.parse(reader);
+            parser.parse(inputFile, compositeHandler);
 
-            // Generate XML and save to file
-            XMLGenerator xmlGenerator = new XMLGenerator();
-            String xmlOutput = xmlGenerator.generateXML(sentences);
-            try (FileWriter xmlWriter = new FileWriter(baseName + ".xml")) {
-                xmlWriter.write(xmlOutput);
-            }
-
-            // Generate CSV and save to file
-            CSVGenerator csvGenerator = new CSVGenerator();
-            String csvOutput = csvGenerator.generateCSV(sentences);
-            try (FileWriter csvWriter = new FileWriter(baseName + ".csv")) {
-                csvWriter.write(csvOutput);
-            }
-
-            System.out.println("XML and CSV files have been saved as '" + baseName + ".xml' and '" + baseName + ".csv'.");
+            log.info("Output files have been saved successfully.");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error processing files", e);
         }
+    }
+
+    private static List<SentenceHandler> createHandlers(String baseName) throws IOException {
+        List<SentenceHandler> handlers = new ArrayList<>();
+
+        // Add handlers for different output formats
+        handlers.add(new XMLSentenceHandler(baseName + ".xml"));
+        handlers.add(new CSVSentenceHandler(baseName + ".csv"));
+
+        // Additional handlers can be added here in the future
+
+        return handlers;
     }
 }
